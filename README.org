@@ -1,0 +1,32 @@
+* Org notifications
+This package creates system notifications for  org-agenda items with timestamps.
+
+Features:
++ Notify a set couple of minutes before the timestamp
++ Choose which agenda or non-agenda files to check or both
++ Optional sound on notifications
++ Exclude and include specific agenda tags
++ Notifies for repeated items
+
+[[screenshots/org-notifications.png]]
+
+* Configuration
+| Variable                                 | Customisation                                               | Default                    |
+|------------------------------------------+-------------------------------------------------------------+----------------------------|
+| org-notifications-non-agenda-file        | Sets which non-agenda file to check, if enabled             | (list "/path/to/file.org") |
+| org-notifications-which-agenda-files     | Sets which agenda files to include                          | Agenda files only          |
+| org-notifications-title                  | Sets the title of notifications                             | Org-mode                   |
+| org-notifications-notify-before-time     | Number of minutes, in seconds, to notify before a timestamp | 300                        |
+| org-notifications-agenda-tags-to-ignore  | Agenda tags to ignore from being notified                   | nil                        |
+| org-notifications-agenda-tags-to-include | Agenda tags to create notifications for                     | nil                        |
+| org-notifications-style                  | Style of the notifications. (styles from the alert package) | 'libnotify                 |
+| org-notifications-play-sounds            | Whether notifications should play sound                     | t                          |
+| org-notifications-sound                  | Sets which sound to play along with the notifications       | "ding_elevator.wav"        |
+
+* Installation
+Put =org-notifications.el= in your =load-path=, and eval =(org-notifications-start)=:
+
+#+begin_src emacs-lisp
+(load-file "/path/tofile/org-notifications.el")
+(org-notifications-start)
+#+end_src
