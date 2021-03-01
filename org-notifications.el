@@ -3,7 +3,7 @@
 ;; Author: doppelc
 ;; URL: https://github.com/doppelc/org-notifications
 ;; Version: 0.1
-;; Package-Requires: ((emacs "25.1") (org "9.0") (sound-wav "0.02") (alert "0.1.0") (seq "2.21"))
+;; Package-Requires: ((emacs "25.1") (org "9.0") (sound-wav "0.02") (alert "1.2") (seq "2.21"))
 ;; Keywords: outlines
 
 ;; License: GNU GPLv3 (or later) <http://www.gnu.org/copyleft/gpl.html>
@@ -30,23 +30,23 @@
 
 (defvar org-notifications-non-agenda-file (list "/path/to/file.org")
   "Add a file that's not ordinarily included among your agenda files.
-For example when you want to use an org capture template to create \
+For example when you want to use an org capture template to create
 notifications without clogging up your org agenda views.")
 
 (defvar org-notifications-which-agenda-files 'agenda-only
-  "Choose which agenda files should be checked for notifications. \
+  "Choose which agenda files should be checked for notifications.
 agenda-only: Use your agenda files from variable `org-agenda-files'.
-non-agenda-file: Use only file(s) specified in \
+non-agenda-file: Use only file(s) specified in
 `org-notifications-non-agenda-file'.
-agenda-and-non-agenda-file: Use both your agenda files from \
-variable `org-agenda-files' and files \
+agenda-and-non-agenda-file: Use both your agenda files from
+variable `org-agenda-files' and files
 specified in `org-notifications-non-agenda-file'.")
 
 (defvar org-notifications-title "Org-mode"
   "Title of the notifications. Headline is added as well.")
 
 (defvar org-notifications-notify-before-time 300
-  "Number of seconds before the event that the notification will be created.\
+  "Number of seconds before the event that the notification will be created.
 Use multiples of 60.")
 
 (defvar org-notifications-agenda-tags-to-ignore nil
@@ -54,8 +54,8 @@ Use multiples of 60.")
 Example: '(\"-tag1\" \"-tag2)")
 
 (defvar org-notifications-agenda-tags-to-include nil
-  "If non-nil, only look at entries with tags in the provided list \
-to the exclusion of any other agenda entries.
+  "If non-nil, only look at entries with tags in the provided list.
+All other org agenda entries are excluded.
 Example: '(\"+tag1\" \"tag2)")
 
 (defvar org-notifications-style 'libnotify
@@ -71,8 +71,9 @@ Example: '(\"+tag1\" \"tag2)")
   "If non-nil, enable sounds with the notifications.")
 
 (defvar org-notifications-sound "ding_elevator.wav"
-  "One of the sounds from `org-notifications-sounds' or a path to a sound file.
-E.g. `ding_elevator.wav' or `/path/to/file.wav'")
+  "Set which sound to play with the notifictions.
+Must be one of the sounds from `org-notifications-sounds' or
+a path to a sound file. E.g. `ding_elevator.wav' or `/path/to/file.wav'")
 
 (defvar org-notifications--sounds
   '("ding_elevator.wav"
@@ -86,8 +87,8 @@ E.g. `ding_elevator.wav' or `/path/to/file.wav'")
   "Sound directory with packaged sounds.")
 
 (defvar org-notifications--timer-object nil
-  "Hold a reference to the timer object which periodically \
-checks if any notification should be created.")
+  "Reference to the timer object.
+Periodically checks if any notification should be created.")
 
 
 
@@ -127,9 +128,10 @@ checks if any notification should be created.")
          (append org-agenda-files (list (car org-notifications-non-agenda-file))))))
 
 (defun org-notifications--create-notify (headline time)
-  "Queue a future notification `org-notifications-notify-before-time' \
-seconds before scheduled time. \
-HEADLINE is the org agenda entry's headline. \
+  "Queue a future notification with HEADLINE and TIME.
+Notification is set to `org-notifications-notify-before-time' seconds
+before scheduled time.
+HEADLINE is the org agenda entry's headline.
 TIME is the org agenda entry's time."
   (run-at-time
    (org-notifications--time-to-hhmm (time-subtract (org-notifications--hhmm-to-time time) org-notifications-notify-before-time)) nil #'org-notifications--notify headline))
@@ -155,8 +157,8 @@ HEADLINE will appear on the notification."
   (format-time-string "%H:%M" time))
 
 (defun org-notifications--play-sound ()
-  "Play a sound from a file (full path) or from a file in \
-`org-notifications--sounds-directory'."
+  "Play a sound from a file (full path) or a prepackaged sound.
+Prepackaged sound comes from `org-notifications--sounds-directory'."
   (if (member org-notifications-sound org-notifications--sounds)
       (sound-wav-play (concat org-notifications--sounds-directory org-notifications-sound))
     (sound-wav-play org-notifications-sound)))
@@ -173,16 +175,16 @@ Returns t if entry's time is close enough to create a notification."
      (>= time-gap org-notifications-notify-before-time))))
 
 (defun org-notifications--extract-time-headline (agenda-line-as-string)
-  "Create a cons cell containing the time `17:00' and the \
-org agenda headline from AGENDA-LINE-AS-STRING. \
-E.g.`TODO Do the dishes' of the agenda entry."
+  "Create a cons cell containing the time `17:00' and the org agenda headline.
+This is done from AGENDA-LINE-AS-STRING.
+ E.g.`TODO Do the dishes' of the agenda entry."
   (let ((time (car (split-string agenda-line-as-string "        ")))
         (headline (nth 1 (split-string agenda-line-as-string "        "))))
     (cons time headline)))
 
 (defun org-notifications--filter-agenda-no-time (agenda-as-string)
-  "Remove items without any time from AGENDA-AS-STRING, i.e. items \
-without `17:00' and the like."
+  "Remove items without any time from AGENDA-AS-STRING.
+I.e. items \ without `17:00' and the like."
   (seq-filter
    (apply-partially #'string-match "[0-9]\\{0,2\\}:[0-9]\\{2\\}")
    (split-string agenda-as-string "\n")))
@@ -190,7 +192,7 @@ without `17:00' and the like."
 (defun org-notifications-start ()
   "Start the timer that is used to collect agenda items."
   (interactive)
-  (org-notifications--set-style)
+  (org-notifications--set-style) ;; https://github.com/jwiegley/alert/issues/92
   (setq org-notifications--timer-object
         (run-at-time 1 org-notifications-notify-before-time 'org-notifications--get-events)))
 
