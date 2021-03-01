@@ -28,38 +28,54 @@
 (require 'seq)
 (require 'sound-wav)
 
-(defvar org-notifications-non-agenda-file (list "/path/to/file.org")
+(defcustom org-notifications-non-agenda-file (list "/path/to/file.org")
   "Add a file that's not ordinarily included among your agenda files.
 For example when you want to use an org capture template to create
-notifications without clogging up your org agenda views.")
+notifications without clogging up your org agenda views."
+  :group 'org-notifications
+  :type 'sexp)
 
-(defvar org-notifications-which-agenda-files 'agenda-only
+(defcustom org-notifications-which-agenda-files 'agenda-only
   "Choose which agenda files should be checked for notifications.
 agenda-only: Use your agenda files from variable `org-agenda-files'.
 non-agenda-file: Use only file(s) specified in
 `org-notifications-non-agenda-file'.
 agenda-and-non-agenda-file: Use both your agenda files from
 variable `org-agenda-files' and files
-specified in `org-notifications-non-agenda-file'.")
+specified in `org-notifications-non-agenda-file'."
+  :group 'org-notifications
+  :type '(choice
+          (const :tag "Use only agenda files from org-agenda-files" agenda-only)
+          (const :tag "USe specific non-agenda file only" non-agenda-file)
+          (const :tag "Use both agenda files and specific non-agenda file" agenda-and-non-agenda-file)))
 
-(defvar org-notifications-title "Org-mode"
-  "Title of the notifications. Headline is added as well.")
+(defcustom org-notifications-title "Org-mode"
+  "Title of the notifications. Headline is added as well."
+  :group 'org-notifications
+  :type 'string)
 
-(defvar org-notifications-notify-before-time 300
-  "Number of seconds before the event that the notification will be created.
-Use multiples of 60.")
+(defcustom org-notifications-notify-before-time 300
+  "Number of seconds before the event that the notification will be created."
+  :group 'org-notifications
+  :type 'integer)
 
-(defvar org-notifications-agenda-tags-to-ignore nil
+(defcustom org-notifications-agenda-tags-to-ignore nil
   "If non-nil, exclude entries with tags in the provided list.
-Example: '(\"-tag1\" \"-tag2)")
+Example: '(\"-tag1\" \"-tag2)"
+  :group 'org-notifications
+  :type '(repeat string))
 
-(defvar org-notifications-agenda-tags-to-include nil
+(defcustom org-notifications-agenda-tags-to-include nil
   "If non-nil, only look at entries with tags in the provided list.
 All other org agenda entries are excluded.
-Example: '(\"+tag1\" \"tag2)")
+Example: '(\"+tag1\" \"tag2)"
+  :group 'org-notifications
+  :type '(repeat string))
 
-(defvar org-notifications-style 'libnotify
-  "Set notification style. Check out the alert package for more styles.")
+(defcustom org-notifications-style 'libnotify
+  "Set notification style. Check out the alert package for more styles."
+  :group 'org-notifications
+  :type 'symbol)
 
 (defun org-notifications--set-style ()
   "Function to set the notification style for this package."
@@ -67,13 +83,17 @@ Example: '(\"+tag1\" \"tag2)")
    :category "org-notifications"
    :style org-notifications-style))
 
-(defvar org-notifications-play-sounds t
-  "If non-nil, enable sounds with the notifications.")
+(defcustom org-notifications-play-sounds t
+  "If non-nil, enable sounds with the notifications."
+  :group 'org-notifications
+  :type 'boolean)
 
-(defvar org-notifications-sound "ding_elevator.wav"
+(defcustom org-notifications-sound "ding_elevator.wav"
   "Set which sound to play with the notifictions.
 Must be one of the sounds from `org-notifications-sounds' or
-a path to a sound file. E.g. `ding_elevator.wav' or `/path/to/file.wav'")
+a path to a sound file. E.g. `ding_elevator.wav' or `/path/to/file.wav'"
+  :group 'org-notifications
+  :type 'string)
 
 (defvar org-notifications--sounds
   '("ding_elevator.wav"
@@ -98,15 +118,15 @@ Periodically checks if any notification should be created.")
     (save-restriction
     (let ((org-agenda-files (org-notifications--agenda-files))
           (org-agenda-use-time-grid nil)
+          (org-agenda-buffer-name "orgnotifications")
           (org-agenda-skip-scheduled-if-done 't)
           (org-agenda-todo-keyword-format "")
           (org-agenda-remove-tags 't)
           (org-agenda-window-setup 'current-window)
           (org-agenda-skip-unavailable-files t)
-          (org-agenda-sticky nil)
+          (org-agenda-sticky t)
           (org-agenda-tag-filter-preset org-notifications-agenda-tags-to-ignore)
           (org-agenda-tag-filter-preset org-notifications-agenda-tags-to-include)
-          (org-super-agenda-mode nil)
           (org-agenda-prefix-format '((agenda . "%-19t"))))
       (org-agenda-list 2))
     (dolist (times-and-headlines (mapcar 'org-notifications--extract-time-headline
@@ -120,12 +140,11 @@ Periodically checks if any notification should be created.")
 
 (defun org-notifications--agenda-files ()
   "Handle which agenda files should be checked for notifications."
-  (cond ((eq org-notifications-which-agenda-files 'agenda-only)
-         org-agenda-files)
-        ((eq org-notifications-which-agenda-files 'non-agenda-file)
-         org-notifications-non-agenda-file)
-        ((eq org-notifications-which-agenda-files 'agenda-and-non-agenda-file)
-         (append org-agenda-files (list (car org-notifications-non-agenda-file))))))
+  (pcase org-notifications-which-agenda-files
+    ('agenda-only (org-agenda-files))
+    ('non-agenda-file org-notifications-non-agenda-file)
+    ('agenda-and-non-agenda-file
+     (append org-agenda-files (list (car org-notifications-non-agenda-file))))))
 
 (defun org-notifications--create-notify (headline time)
   "Queue a future notification with HEADLINE and TIME.
