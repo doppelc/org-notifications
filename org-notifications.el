@@ -194,16 +194,18 @@ Returns t if entry's time is close enough to create a notification."
                    (time-subtract
                     (org-notifications--hhmm-to-time time)
                     (current-time)))))
-    (and
-     (<= time-gap (+ org-notifications-notify-before-time
-                     org-notifications-notify-before-time))
-     (>= time-gap org-notifications-notify-before-time))))
+    (and (<= time-gap (+ org-notifications-notify-before-time
+                         org-notifications-notify-before-time))
+         (>= time-gap org-notifications-notify-before-time))))
 
 (defun org-notifications--extract-time-headline (agenda-line-as-string)
   "Create a cons cell containing the time `17:00' and the org agenda headline.
 This is done from AGENDA-LINE-AS-STRING.
 E.g.`TODO Do the dishes' of the agenda entry."
-  (let ((time (car (split-string agenda-line-as-string "        ")))
+  (let ((time (car (split-string
+                    (car (split-string agenda-line-as-string
+                                       "        "))
+                    "-"))) ;; Handle appointmens. E.g. 08:00-11:00
         (headline (nth 1 (split-string agenda-line-as-string "        "))))
     (cons time headline)))
 
