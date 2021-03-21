@@ -1,4 +1,6 @@
 * Org notifications
+[[https://melpa.org/#/org-notifications][file:https://melpa.org/packages/org-notifications-badge.svg]]
+ 
 This package creates system notifications for  org-agenda items with timestamps.
 
 Features:
@@ -24,6 +26,10 @@ Features:
 | org-notifications-sound                  | Sets which sound to play along with the notifications       | "ding_elevator.wav"        |
 
 * Installation
+** MELPA
+This package can be installed directly from MELPA: =M-x package-install RET org-notifications=.
+
+** Manually
 Put =org-notifications.el= in your =load-path=, and eval =(org-notifications-start)=:
 
 #+begin_src emacs-lisp
