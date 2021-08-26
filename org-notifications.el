@@ -132,6 +132,7 @@ Periodically checks if any notification should be created.")
             (org-agenda-tag-filter-preset org-notifications-agenda-tags-to-ignore)
             (org-agenda-tag-filter-preset org-notifications-agenda-tags-to-include)
             (org-agenda-prefix-format '((agenda . "%-19t"))))
+        (put 'org-agenda-files 'org-restrict nil)
         (org-agenda-list 2))
       (dolist (times-and-headlines (mapcar #'org-notifications--extract-time-headline
                                            (org-notifications--filter-agenda-no-time
