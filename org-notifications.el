@@ -217,6 +217,7 @@ I.e. items without `17:00' and the like."
    (apply-partially #'string-match "[0-9]\\{0,2\\}:[0-9]\\{2\\}")
    (split-string agenda-as-string "\n")))
 
+;;;###autoload
 (defun org-notifications-start ()
   "Start the timer that is used to collect agenda items."
   (interactive)
@@ -226,6 +227,7 @@ I.e. items without `17:00' and the like."
                      org-notifications-notify-before-time
                      #'org-notifications--get-events)))
 
+;;;###autoload
 (defun org-notifications-stop ()
   "Stop the timer that is used to collect agenda items."
   (interactive)
